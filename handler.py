@@ -4,13 +4,12 @@ from loguru import logger
 import json
 
 from storage import Data
-from service import get_prompts, send_prompt, interaction
+from service import get_prompts, send_prompt, interaction, send_message, save
 from config import MIDJOURNERY_ID, PROMPT_GENERATE_TYPE, UPSCALE_TYPE
 
 
 async def handler(event: dict):
     logger.info("event handle")
-    print(event)
     try:
         author = event["d"].get("author")
     except:
@@ -37,7 +36,8 @@ async def handle_midjourney(event: dict):
         return
     message_type = event["t"]
     if message_type == "MESSAGE_CREATE":
-        logger.info("Check MESSAGE_CREATE")
+        logger.success("Check MESSAGE_CREATE")
+        print(event)
         await handle_message_create(event)
     elif message_type == "MESSAGE_UPDATE":
         logger.info("Check MESSAGE_UPDATE")
@@ -52,7 +52,7 @@ async def handle_message_create(event: dict):
         if check_content_upscale_type(content, UPSCALE_TYPE):
             logger.info("Found upscale prompt")
             components = [event["d"]["attachments"][0]["url"]]
-            choose = content.replace("**","").split("-")[0].strip()
+            choose = event["d"]["referenced_message"]["components"][0]["components"][0]["custom_id"]
             await update_upscale(choose,components)
         else:
             components = [x["custom_id"] for x in event["d"]["components"][0]["components"]][:4]
@@ -70,9 +70,20 @@ async def handle_message_create(event: dict):
                     prompt = embed["footer"]["text"].replace("/imagine ","").split("-")[0].strip()
                     data = [{x:Data.choose[x]} for x in Data.choose if prompt in Data.choose[x]["prompt"]][0]
                     Data.wait_upsclae.append(data)
+            else:
+                try:
+                    logger.warning("Found bad prompt")
+                    prompt = embed["footer"]["text"].replace("/imagine ","").split("-")[0].strip()
+                    for i in Data.prompts:
+                        if prompt in i:
+                            Data.prompts[i]["components"].append(None)
+                            break
+                except:
+                    logger.info("Could not content '' error")
+                    return
                     
         elif "- Image #" in content:
-            custom_id = event["d"]["components"][0]["components"][1]["custom_id"]
+            custom_id = event["d"]["components"][0]["components"][0]["custom_id"]
             image = event["d"]["attachments"][0]["url"]
             prompt = event["d"]["content"].replace("**","").split("-")[0].strip()
             message_id = event["d"]["id"]
@@ -88,7 +99,7 @@ async def update_prompt(content, components):
             logger.success(f"Updated prompt {Data.prompts[prompt]}")
             if Data.wait_prompts != []:
                 wait_prompt = Data.wait_prompts.pop(0)
-                send_prompt(wait_prompt)
+                await send_prompt(wait_prompt)
                 clear_prompt = wait_prompt.split("-")[0].strip()
                 Data.prompts[clear_prompt] = {"components":[], "real_name":wait_prompt}
             return
@@ -100,13 +111,13 @@ async def update_upscale(content, components):
             logger.success(f"Updated upscale {Data.upsclae[choose]}")
             if Data.wait_upsclae != []:
                 wait_upscale = Data.wait_upsclae.pop(0)
-                new_chose = list(wait_upscale.keys())[0]
-                Data.upsclae[wait_upscale] = {"components":[], "message_id":wait_upscale[new_chose]["message_id"], "prompt":wait_upscale[new_chose]["prompt"]}
-                send_upscale(wait_upscale[new_chose]["message_id"], wait_upscale[new_chose]["custom_id"])
+                custom_id = list(wait_upscale.keys())[0]
+                Data.upsclae[custom_id] = {"components":[], "message_id":wait_upscale[custom_id]["message_id"], "prompt":wait_upscale[custom_id]["prompt"]}
+                await send_upscale(wait_upscale[custom_id]["message_id"], custom_id)
             return
 
 async def send_upscale(message_id, custom_id):
-    interaction(message_id, custom_id)
+    await interaction(message_id, custom_id)
 
 def check_content_end(content, check_type):
     return any([True for x in check_type if content.endswith(x)])
@@ -116,6 +127,7 @@ def check_content_upscale_type(content, check_type):
 
 async def handle_message_update(event):
     Data.update_time = datetime.utcnow()
+    logger.debug(f"Update time {Data.update_time}")
 
 async def check_start(event: dict):
     content = event["d"]["content"]
@@ -138,18 +150,23 @@ async def check_start(event: dict):
         Data.author_id = author_id
         Data.guild_id = guild_id
         Data.channel_id = channel_id
+    elif content == "save":
+        save()
+    elif content == "save c":
+        save("c")
 
 async def upscale_process():
     Data.process_type = "u"
-    for choose in Data.choose:
-        if Data.wait_upsclae != []:
-            Data.wait_upsclae.append({choose:Data.choose[choose]})
-        else:
-            interaction(Data.choose[choose]["message_id"], choose)
-            Data.upsclae[choose] = {"components": [], "message_id":Data.choose[choose]["message_id"], "prompt":Data.choose[choose]["prompt"]}
+    for zi, choose in enumerate(Data.choose):
+        Data.upsclae[choose] = {"components": [], "message_id":Data.choose[choose]["message_id"], "prompt":Data.choose[choose]["prompt"]}
+        if zi < 3:
+            await interaction(Data.choose[choose]["message_id"], choose)
             logger.success(f"Upscale {choose}")
+        else:
+            Data.wait_upsclae.append({choose:Data.choose[choose]})
         await asyncio.sleep(1)
     asyncio.create_task(check_upscale_done())
+    asyncio.create_task(check_upscale_time())
 
 async def check_prompt_time():
     Data.update_time = datetime.utcnow()
@@ -157,11 +174,14 @@ async def check_prompt_time():
         logger.info(f"Check prompt time {datetime.utcnow()} {Data.update_time}")
         if Data.prompts_done == False:
             if datetime.utcnow() - Data.update_time > timedelta(minutes=2):
-                logger.info("Prompt time out")
+                logger.warning("Prompt time out")
+                if Data.prompts == []:
+                    Data.prompts_done = True
+                    return
                 for prompt in Data.prompts:
                     if Data.prompts[prompt]["components"] == []:
                         real_prompt = [x for x in Data.prompts if prompt in x][0]
-                        send_prompt(real_prompt)
+                        await send_prompt(real_prompt)
                         clear_prompt = real_prompt.split("-")[0].strip()
                         Data.prompts[clear_prompt] = {"components":[], "real_name":real_prompt}
                 Data.update_time = datetime.utcnow()
@@ -170,17 +190,38 @@ async def check_prompt_time():
         else:
             return
 
+async def check_upscale_time():
+    Data.update_time = datetime.utcnow()
+    while True:
+        logger.info(f"Check prompt time {datetime.utcnow()} {Data.update_time}")
+        if Data.upscale_done == False:
+            if (datetime.utcnow() - Data.update_time) > timedelta(minutes=2):
+                logger.warning("Upscale time out")
+                if Data.wait_upsclae != []:
+                    wait_upscale = Data.wait_upsclae.pop(0)
+                    new_chose = list(wait_upscale.keys())[0]
+                    Data.upsclae[wait_upscale] = {"components":[], "message_id":wait_upscale[new_chose]["message_id"], "prompt":wait_upscale[new_chose]["prompt"]}
+                    await send_upscale(wait_upscale[new_chose]["message_id"], wait_upscale[new_chose]["custom_id"])
+                    Data.update_time = datetime.utcnow()
+                else:
+                    Data.upscale_done = True
+                    return
+            else:
+                await asyncio.sleep(20)
+        else:
+            return
+
 async def prompt_process():
     Data.process_type = "p"
     prompts = get_prompts()
-    for prompt in prompts:
-        if Data.wait_prompts != []:
-            Data.wait_prompts.append(prompt)
-        else:
-            send_prompt(prompt)
+    for zi, prompt in enumerate(prompts):
+        if zi < 3:
+            await send_prompt(prompt)
             clear_prompt = prompt.split("-")[0].strip()
             Data.prompts[clear_prompt] = {"components":[], "real_name":prompt}
             await asyncio.sleep(1)
+        else:
+            Data.wait_prompts.append(prompt)
     
     asyncio.create_task(check_prompts_done())
     asyncio.create_task(check_prompt_time())
@@ -191,8 +232,9 @@ async def check_prompts_done():
         for prompt in Data.prompts:
             if Data.prompts[prompt]["components"] == []:
                 result += 1
-        if result == 0 and Data.wait_prompts == []:
+        if (result == 0 or Data.prompts_done == True) and Data.wait_prompts == []:
             logger.success("All prompts done")
+            send_message("All prompts done")
             Data.prompts_done = True
             break
         else:
@@ -206,8 +248,10 @@ async def check_upscale_done():
         for choose in Data.upsclae:
             if Data.upsclae[choose]["components"] == []:
                 result += 1
-        if result == 0 and Data.wait_upsclae == []:
+        if (result == 0 or Data.upscale_done == True) and Data.wait_upsclae == []:
             logger.success("All upscale done")
+            send_message("All upscale done")
+            Data.upscale_done = True
             break
         else:
             logger.info(f"Check upscale done {Data.upsclae}")

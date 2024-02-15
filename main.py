@@ -18,7 +18,12 @@ class Connect:
         asyncio.run(self.main())
 
     async def send_json(self, ws, message):
-        await ws.send(json.dumps(message))
+        try:
+            await ws.send(json.dumps(message))
+        except:
+            logger.warning("connection error")
+            await asyncio.sleep(5)
+            return await self.main()
 
     async def rec_json(self, ws):
         try:
@@ -26,7 +31,8 @@ class Connect:
             return json.loads(response)
         except:
             logger.warning("Could not receive")
-            return await self.rec_json(ws)
+            await asyncio.sleep(5)
+            return await self.main()
         
     async def send_heartbeats(self, ws, interval):
         while True:
@@ -75,45 +81,49 @@ class Connect:
         await self.send_json(ws, resume_payload)
 
     async def main(self):
-        async with websockets.connect("wss://gateway.discord.gg/?v=9&encoding=json") as ws:
-            while True:
-                event = await self.rec_json(ws)
-                if event["op"] == 10:
-                    heartbeat_interval = event["d"]["heartbeat_interval"] / 1000
-                    logger.info("successfully connected to gateway")
-                    asyncio.create_task(
-                        self.send_heartbeats(ws, heartbeat_interval))
-                    if self.status == "identity":
-                        await self.identify(ws)
-                    else:
+        try:
+            async with websockets.connect("wss://gateway.discord.gg/?v=9&encoding=json") as ws:
+                while True:
+                    event = await self.rec_json(ws)
+                    if event["op"] == 10:
+                        heartbeat_interval = event["d"]["heartbeat_interval"] / 1000
+                        logger.info("successfully connected to gateway")
+                        asyncio.create_task(
+                            self.send_heartbeats(ws, heartbeat_interval))
+                        if self.status == "identity":
+                            await self.identify(ws)
+                        else:
+                            await self.resume(ws)
+
+                    elif event["t"] == 'READY':
+                        self.session_id = event['d']['session_id']
+                        logger.info("bot is now ready")
+
+                    elif event["op"] == 11:
+                        logger.info('HEARTBEAT RECEIVED')
+                        self.heartbeat_received = True
+
+                    elif event["op"] == 1:
+                        logger.info("op code 1 received")
+                        jsonPayload = {
+                            "op": 1,
+                            "d": self.sequence
+                        }
+                        await self.send_json(ws, jsonPayload)
+
+                    elif event["op"] == 7:
+                        logger.info("reconnecting")
                         await self.resume(ws)
 
-                elif event["t"] == 'READY':
-                    self.session_id = event['d']['session_id']
-                    logger.info("bot is now ready")
+                    else:
+                        asyncio.create_task(handler(event))
+                        # await handler(event)
 
-                elif event["op"] == 11:
-                    logger.info('HEARTBEAT RECEIVED')
-                    self.heartbeat_received = True
-
-                elif event["op"] == 1:
-                    logger.info("op code 1 received")
-                    jsonPayload = {
-                        "op": 1,
-                        "d": self.sequence
-                    }
-                    await self.send_json(ws, jsonPayload)
-
-                elif event["op"] == 7:
-                    logger.info("reconnecting")
-                    await self.resume(ws)
-
-                else:
-                    asyncio.create_task(handler(event))
-                    # await handler(event)
-
-                self.sequence = event['s']
-
+                    self.sequence = event['s']
+        except:
+            logger.warning("Coonect failed")
+            await asyncio.sleep(5)
+            return await self.main()
 
 if __name__ == "__main__":
     Connect(AUTH_TOKEN)

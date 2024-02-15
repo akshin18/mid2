@@ -13,3 +13,4 @@ class Data:
     wait_upsclae = []
     update_time = None
     prompts_done = False
+    upscale_done = False

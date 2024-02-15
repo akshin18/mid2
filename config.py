@@ -11,5 +11,5 @@ HEADERS = {
         "Authorization": AUTH_TOKEN,
     }
 
-PROMPT_GENERATE_TYPE = ["(relaxed)"]
+PROMPT_GENERATE_TYPE = ["(relaxed)", "(fast)"]
 UPSCALE_TYPE = ["(Creative)","(Subtle)"]
