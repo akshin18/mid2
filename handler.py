@@ -4,12 +4,13 @@ from loguru import logger
 import json
 
 from storage import Data
-from service import get_prompts, send_prompt, interaction, send_message, save
+from service import get_prompts, send_prompt, interaction, send_message, save, upload_images, get_link, describe_interaction, find_message
 from config import MIDJOURNERY_ID, PROMPT_GENERATE_TYPE, UPSCALE_TYPE
 
 
 async def handler(event: dict):
     logger.info("event handle")
+    print(event)
     try:
         author = event["d"].get("author")
     except:
@@ -37,7 +38,6 @@ async def handle_midjourney(event: dict):
     message_type = event["t"]
     if message_type == "MESSAGE_CREATE":
         logger.success("Check MESSAGE_CREATE")
-        print(event)
         await handle_message_create(event)
     elif message_type == "MESSAGE_UPDATE":
         logger.info("Check MESSAGE_UPDATE")
@@ -59,7 +59,10 @@ async def handle_message_create(event: dict):
             await update_prompt(content, components)
     else:
         if content == "":
-            embed = event["d"]["embeds"][0]
+            try:
+                embed = event["d"]["embeds"][0]
+            except:
+                return
             if embed["description"] == "You have reached the maximum allowed number of concurrent jobs. Don't worry, this job will start as soon as another one finishes!":
                 if Data.process_type == "p":
                     prompt = embed["footer"]["text"].replace("/imagine ","").split("-")[0].strip()
@@ -126,8 +129,18 @@ def check_content_upscale_type(content, check_type):
     return any([True for x in check_type if x in content])
 
 async def handle_message_update(event):
-    Data.update_time = datetime.utcnow()
-    logger.debug(f"Update time {Data.update_time}")
+    try:
+        if event["d"]["interaction_metadata"]["name"] == "describe":
+            logger.success("found describe")
+            message_id = event["d"]["id"]
+            logger.success(message_id)
+            find_message(message_id)
+            await describe()
+    except Exception as e:
+        logger.error(e)
+    finally:
+        Data.update_time = datetime.utcnow()
+        logger.debug(f"Update time {Data.update_time}")
 
 async def check_start(event: dict):
     content = event["d"]["content"]
@@ -154,6 +167,23 @@ async def check_start(event: dict):
         save()
     elif content == "save c":
         save("c")
+    elif content == "desc":
+        logger.debug("Starting upload images")
+        upload_images()
+        logger.debug("Starting describe images")
+        await describe()
+
+
+async def describe():
+    if Data.to_describe != []:
+        image_path = Data.to_describe.pop(0)
+        link = get_link(image_path)
+        await describe_interaction(link)
+        logger.success("image described")
+    else:
+        logger.success("All images described")
+        send_message("All images described")
+
 
 async def upscale_process():
     Data.process_type = "u"

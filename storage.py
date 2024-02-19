@@ -14,3 +14,4 @@ class Data:
     update_time = None
     prompts_done = False
     upscale_done = False
+    to_describe = []
