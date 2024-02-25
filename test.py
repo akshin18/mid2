@@ -1,13 +1,11 @@
-import random
-
 a = {
     "t": "MESSAGE_CREATE",
-    "s": 31,
+    "s": 45,
     "op": 0,
     "d": {
         "type": 0,
         "tts": False,
-        "timestamp": "2024-02-19T20:25:22.444000+00:00",
+        "timestamp": "2024-02-24T15:45:52.657000+00:00",
         "referenced_message": None,
         "pinned": False,
         "mentions": [
@@ -47,11 +45,11 @@ a = {
             "communication_disabled_until": None,
             "avatar": None,
         },
-        "id": "1209234295122567228",
+        "id": "1210975896865873992",
         "flags": 0,
         "embeds": [],
         "edited_timestamp": None,
-        "content": "**perfume bottles on top of a colorful background, in the style of light magenta and dark amber, photorealistic renderings,light & shadow, handcrafted beauty, dark gold and light crimson --ar 3:2 --v 6.0 --style raw --s 50** - <@1196863280828924057> (fast)",
+        "content": "**man in a black t shirt with his hand on his stomach, looking down, in the style of photorealistic rendering, cityscape, high quality photo, smooth and shiny, vibrant colorism, elegant , contest winner --ar 3:2 --v 6.0 --style raw --s 50** - <@1196863280828924057> (relaxed)",
         "components": [
             {
                 "type": 1,
@@ -60,31 +58,31 @@ a = {
                         "type": 2,
                         "style": 2,
                         "label": "U1",
-                        "custom_id": "MJ::JOB::upsample::1::608da835-ce2e-4576-b583-d5b251649bef",
+                        "custom_id": "MJ::JOB::upsample::1::8cba6250-1da2-4c29-b2a2-6d6fa02aabc7",
                     },
                     {
                         "type": 2,
                         "style": 2,
                         "label": "U2",
-                        "custom_id": "MJ::JOB::upsample::2::608da835-ce2e-4576-b583-d5b251649bef",
+                        "custom_id": "MJ::JOB::upsample::2::8cba6250-1da2-4c29-b2a2-6d6fa02aabc7",
                     },
                     {
                         "type": 2,
                         "style": 2,
                         "label": "U3",
-                        "custom_id": "MJ::JOB::upsample::3::608da835-ce2e-4576-b583-d5b251649bef",
+                        "custom_id": "MJ::JOB::upsample::3::8cba6250-1da2-4c29-b2a2-6d6fa02aabc7",
                     },
                     {
                         "type": 2,
                         "style": 2,
                         "label": "U4",
-                        "custom_id": "MJ::JOB::upsample::4::608da835-ce2e-4576-b583-d5b251649bef",
+                        "custom_id": "MJ::JOB::upsample::4::8cba6250-1da2-4c29-b2a2-6d6fa02aabc7",
                     },
                     {
                         "type": 2,
                         "style": 2,
                         "emoji": {"name": "🔄"},
-                        "custom_id": "MJ::JOB::reroll::0::608da835-ce2e-4576-b583-d5b251649bef::SOLO",
+                        "custom_id": "MJ::JOB::reroll::0::8cba6250-1da2-4c29-b2a2-6d6fa02aabc7::SOLO",
                     },
                 ],
             },
@@ -95,30 +93,30 @@ a = {
                         "type": 2,
                         "style": 2,
                         "label": "V1",
-                        "custom_id": "MJ::JOB::variation::1::608da835-ce2e-4576-b583-d5b251649bef",
+                        "custom_id": "MJ::JOB::variation::1::8cba6250-1da2-4c29-b2a2-6d6fa02aabc7",
                     },
                     {
                         "type": 2,
                         "style": 2,
                         "label": "V2",
-                        "custom_id": "MJ::JOB::variation::2::608da835-ce2e-4576-b583-d5b251649bef",
+                        "custom_id": "MJ::JOB::variation::2::8cba6250-1da2-4c29-b2a2-6d6fa02aabc7",
                     },
                     {
                         "type": 2,
                         "style": 2,
                         "label": "V3",
-                        "custom_id": "MJ::JOB::variation::3::608da835-ce2e-4576-b583-d5b251649bef",
+                        "custom_id": "MJ::JOB::variation::3::8cba6250-1da2-4c29-b2a2-6d6fa02aabc7",
                     },
                     {
                         "type": 2,
                         "style": 2,
                         "label": "V4",
-                        "custom_id": "MJ::JOB::variation::4::608da835-ce2e-4576-b583-d5b251649bef",
+                        "custom_id": "MJ::JOB::variation::4::8cba6250-1da2-4c29-b2a2-6d6fa02aabc7",
                     },
                 ],
             },
         ],
-        "channel_id": "1196873796511076426",
+        "channel_id": "1210974921430138880",
         "author": {
             "username": "Midjourney Bot",
             "public_flags": 589824,
@@ -133,17 +131,33 @@ a = {
         "attachments": [
             {
                 "width": 2688,
-                "url": "https://cdn.discordapp.com/attachments/1196873796511076426/1209234294300614666/katttyr_perfume_bottles_on_top_of_a_colorful_background_in_the__608da835-ce2e-4576-b583-d5b251649bef.png?ex=65e62e32&is=65d3b932&hm=8bdf277711306dc87715a62ab61521bf243350e60927b88ef3c0c88ad58a081e&",
-                "size": 9115904,
-                "proxy_url": "https://media.discordapp.net/attachments/1196873796511076426/1209234294300614666/katttyr_perfume_bottles_on_top_of_a_colorful_background_in_the__608da835-ce2e-4576-b583-d5b251649bef.png?ex=65e62e32&is=65d3b932&hm=8bdf277711306dc87715a62ab61521bf243350e60927b88ef3c0c88ad58a081e&",
+                "url": "https://cdn.discordapp.com/attachments/1210974921430138880/1210975896488517692/katttyr_man_in_a_black_t_shirt_with_his_hand_on_his_stomach_loo_8cba6250-1da2-4c29-b2a2-6d6fa02aabc7.png?ex=65ec8430&is=65da0f30&hm=72e715bc699c09d662c1d0a163648d5be23681a9eb73aec410f692c72d7cae38&",
+                "size": 7675630,
+                "proxy_url": "https://media.discordapp.net/attachments/1210974921430138880/1210975896488517692/katttyr_man_in_a_black_t_shirt_with_his_hand_on_his_stomach_loo_8cba6250-1da2-4c29-b2a2-6d6fa02aabc7.png?ex=65ec8430&is=65da0f30&hm=72e715bc699c09d662c1d0a163648d5be23681a9eb73aec410f692c72d7cae38&",
                 "placeholder_version": 1,
-                "placeholder": "WZkGFYT3lIhbeKhbV7mHVSYMp4pg",
-                "id": "1209234294300614666",
+                "placeholder": "TRgGDYI2zoBMh2iHmJeJWnVPtvlo",
+                "id": "1210975896488517692",
                 "height": 1792,
-                "filename": "katttyr_perfume_bottles_on_top_of_a_colorful_background_in_the__608da835-ce2e-4576-b583-d5b251649bef.png",
+                "filename": "katttyr_man_in_a_black_t_shirt_with_his_hand_on_his_stomach_loo_8cba6250-1da2-4c29-b2a2-6d6fa02aabc7.png",
                 "content_type": "image/png",
             }
         ],
         "guild_id": "1196873796511076423",
+    },
+}
+
+
+b = {
+    "man portrait wearing black shirt, in the style of soft and rounded forms, photorealistic urban scenes, hispanicore, high quality photo, vibrant color gradients, realistic anatomies, rtx on": {
+        "components": [],
+        "real_name": "man portrait wearing black shirt, in the style of soft and rounded forms, photorealistic urban scenes, hispanicore, high quality photo, vibrant color gradients, realistic anatomies, rtx on --ar 3:2 --v 6.0 --style raw --s 50",
+    },
+    "man in a black t  shirt with his hand on his stomach, looking down, in the style of photorealistic rendering, cityscape, high quality photo, smooth and shiny, vibrant colorism, elegant , contest winner": {
+        "components": [],
+        "real_name": "man in a black t  shirt with his hand on his stomach, looking down, in the style of photorealistic rendering, cityscape, high quality photo, smooth and shiny, vibrant colorism, elegant , contest winner --ar 3:2 --v 6.0 --style raw --s 50",
+    },
+    "man wearing black shirt and glasses, in the style of smooth curves, ultra realistic, street-savvy, warmcore, toning technique, 8k, hispanicore": {
+        "components": [],
+        "real_name": "man wearing black shirt and glasses, in the style of smooth curves, ultra realistic, street-savvy, warmcore, toning technique, 8k, hispanicore --ar 3:2 --v 6.0 --style raw --s 50",
     },
 }

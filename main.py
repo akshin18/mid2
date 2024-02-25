@@ -8,6 +8,7 @@ from handler import handler
 from config import AUTH_TOKEN
 
 
+logger.add("test.log", rotation="100 MB")
 
 class Connect:
     def __init__(self, token):

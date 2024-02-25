@@ -4,6 +4,7 @@ from exiftool import ExifToolHelper
 
 def set_metadata(data:list):
     for image_path, prompt in data:
+        prompt = prompt.split(",")[0].replace("**","").strip()
         with ExifToolHelper() as et:
             et.set_tags(
                 [image_path],

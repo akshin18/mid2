@@ -210,8 +210,8 @@ def save(t="u"):
                     f.write(r.content)
                 images_data.append([image_path, img_prompt])
         set_metadata(images_data)
-    logger.success("Saved images")
-    send_message("images saved")
+        logger.success("Saved images")
+        send_message("images saved")
 
 
 def upload_images():
