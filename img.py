@@ -4,14 +4,17 @@ from loguru import logger
 
 def set_metadata(data:list):
     for image_path, prompt in data:
-        prompt = prompt.split(",")[0].replace("**","").strip()
-        logger.debug(f"Saving metadata {image_path} prompt: {prompt}")
-        with ExifToolHelper() as et:
-            et.set_tags(
-                [image_path],
-                tags={"XMP:Title": prompt},
-                params=["-P", "-overwrite_original"]
-            )
+        try:
+            prompt = prompt.split(",")[0].replace("**","").strip()
+            logger.debug(f"Saving metadata {image_path} prompt: {prompt}")
+            with ExifToolHelper() as et:
+                et.set_tags(
+                    [image_path],
+                    tags={"XMP:Title": prompt},
+                    params=["-P", "-overwrite_original"]
+                )
+        except Exception as e:
+                logger.error(f"Could not save metadata {image_path} {prompt} {e}")
 
 
 def get_metadata():
