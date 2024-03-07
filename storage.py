@@ -16,3 +16,4 @@ class Data:
     upscale_done = False
     to_describe = []
     auto = False
+    duration = 1

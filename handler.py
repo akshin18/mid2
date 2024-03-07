@@ -98,24 +98,29 @@ async def handle_message_create(event: dict):
             Data.choose[custom_id] = {"prompt":prompt, "image":image, "message_id":message_id}
             logger.success(f"Found image {prompt} {custom_id} {message_id}")
         else:
-            logger.info("Could not find components")
+            logger.info(f"Could not find components\n{content}")
 
 async def update_prompt(content, components, message_id):
+    await asyncio.sleep(Data.duration)
     logger.debug("try to Update prompt")
-    for prompt in Data.prompts:
-        short_prompt = prompt.split("--")[0].strip().replace("**","")
-        if short_prompt in content:
-            Data.prompts[prompt]["components"] = components
-            Data.prompts[prompt]["message_id"] = message_id
-            logger.success(f"Updated prompt {Data.prompts[prompt]}")
-            if Data.wait_prompts != []:
+    if Data.wait_prompts != []:
                 wait_prompt = Data.wait_prompts.pop(0)
                 await send_prompt(wait_prompt)
-                clear_prompt = wait_prompt.split("--")[0].strip()
-                Data.prompts[clear_prompt] = {"components":[], "real_name":wait_prompt}
-            return
+    # for prompt in Data.prompts:
+    #     short_prompt = prompt.split("--")[0].strip().replace("**","")
+    #     if short_prompt in content:
+    #         Data.prompts[prompt]["components"] = components
+    #         Data.prompts[prompt]["message_id"] = message_id
+    #         logger.success(f"Updated prompt {Data.prompts[prompt]}")
+    #         if Data.wait_prompts != []:
+    #             wait_prompt = Data.wait_prompts.pop(0)
+    #             await send_prompt(wait_prompt)
+    #             clear_prompt = wait_prompt.split("--")[0].strip()
+    #             Data.prompts[clear_prompt] = {"components":[], "real_name":wait_prompt}
+    #         return
 
 async def update_upscale(content, components):
+    await asyncio.sleep(Data.duration)
     for choose in Data.choose:
         if choose in content:
             if choose not in Data.upsclae:
@@ -167,7 +172,12 @@ async def check_start(event: dict):
         Data.prompts_done = True
         Data.wait_prompts = []
         await upscale_process()
-    elif content == "con":
+    elif content.startswith("con"):
+        duration = content.split(" ")[-1]
+        try:
+            Data.duration = int(duration)
+        except:
+            Data.duration = 1
         author_id =event["d"]["author"]["id"]
         guild_id = event["d"]["guild_id"]
         channel_id = event["d"]["channel_id"]
@@ -288,9 +298,9 @@ async def prompt_process():
 async def check_prompts_done():
     while True:
         result = 0
-        for prompt in Data.prompts:
-            if Data.prompts[prompt]["components"] == []:
-                result += 1
+        # for prompt in Data.prompts:
+        #     if Data.prompts[prompt]["components"] == []:
+        #         result += 1
         if (result == 0 or Data.prompts_done == True) and Data.wait_prompts == []:
             logger.success("All prompts done")
             send_message("All prompts done")
